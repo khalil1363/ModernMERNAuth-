@@ -1,0 +1,232 @@
+<div class="container">
+  <div class="header">
+    <h1>Employee Registration Form</h1>
+    <div class="nav-buttons">
+      <div class="dropdown">
+        <button type="button" class="btn btn-secondary dropdown-toggle" (click)="toggleDropdown()">
+          User Dashboard
+        </button>
+        <div class="dropdown-menu" [class.show]="showDropdown">
+          <button type="button" class="dropdown-item" (click)="goToUserDashboard(); hideDropdown()">
+            Use Current Matricule
+          </button>
+          <button type="button" class="dropdown-item" (click)="goToUserDashboardWithPrompt(); hideDropdown()">
+            Enter Different Matricule
+          </button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="goToAdminDashboard()">Admin Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Quick User Dashboard Access -->
+  <div class="quick-access-section" *ngIf="!employee.matricule || !employee.matricule.trim()">
+    <div class="quick-access-card">
+      <h3>🔍 Quick Access to User Dashboard</h3>
+      <p>Enter a matricule number to access an existing employee's dashboard:</p>
+      <div class="quick-access-form">
+        <input
+          type="text"
+          [(ngModel)]="quickAccessMatricule"
+          placeholder="Enter matricule number..."
+          class="form-control"
+          (keyup.enter)="goToUserDashboardQuick()"
+        >
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="goToUserDashboardQuick()"
+          [disabled]="!quickAccessMatricule || !quickAccessMatricule.trim()"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #employeeForm="ngForm">
+    <!-- Employee Information -->
+    <div class="section">
+      <h2>Employee Information</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
+          <input type="text" id="firstName" name="firstName" [(ngModel)]="employee.firstName" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input type="text" id="lastName" name="lastName" [(ngModel)]="employee.lastName" required class="form-control">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="matricule">Matricule *</label>
+          <input type="text" id="matricule" name="matricule" [(ngModel)]="employee.matricule" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="dateBirth">Date of Birth *</label>
+          <input type="date" id="dateBirth" name="dateBirth" [(ngModel)]="employee.dateBirth" required class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="workplace">Workplace *</label>
+        <input type="text" id="workplace" name="workplace" [(ngModel)]="employee.workplace" required class="form-control">
+      </div>
+    </div>
+
+    <!-- Wife Information -->
+    <div class="section">
+      <h2>Wife Information (Optional)</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="wifeFirstName">Wife First Name</label>
+          <input type="text" id="wifeFirstName" name="wifeFirstName" [(ngModel)]="employee.wifeFirstName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="wifeLastName">Wife Last Name</label>
+          <input type="text" id="wifeLastName" name="wifeLastName" [(ngModel)]="employee.wifeLastName" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="wifeWorkplace">Wife Workplace</label>
+          <input type="text" id="wifeWorkplace" name="wifeWorkplace" [(ngModel)]="employee.wifeWorkplace" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="wifeMatricule">Wife Matricule</label>
+          <input type="text" id="wifeMatricule" name="wifeMatricule" [(ngModel)]="employee.wifeMatricule" class="form-control">
+        </div>
+      </div>
+    </div>
+
+    <!-- Children Information -->
+    <div class="section">
+      <h2>Children Information</h2>
+      <div class="form-group">
+        <label for="numChildren">Number of Children</label>
+        <input type="number" id="numChildren" name="numChildren" [(ngModel)]="employee.numChildren" min="0" class="form-control">
+      </div>
+
+      <!-- Primary Education Children -->
+      <div class="children-section">
+        <h3>Primary Education Children</h3>
+        <button type="button" class="btn btn-add" (click)="addPrimaryChild()">Add Primary Education Child</button>
+
+        <div *ngFor="let child of primaryChildren; let i = index" class="child-form">
+          <div class="child-header">
+            <h4>Primary Child {{i + 1}}</h4>
+            <button type="button" class="btn btn-remove" (click)="removePrimaryChild(i)">Remove</button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Child Full Name</label>
+              <input type="text" [(ngModel)]="child.childFullName" name="primaryChildName{{i}}" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Child Birth Date</label>
+              <input type="date" [(ngModel)]="child.childBirthDate" name="primaryChildBirth{{i}}" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Year</label>
+              <input type="text" [(ngModel)]="child.academicYear" name="primaryChildYear{{i}}" placeholder="e.g., 2023-2024" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>PDF File</label>
+              <input type="file" (change)="onPrimaryFileSelected($event, i)" accept=".pdf" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Education Children -->
+      <div class="children-section">
+        <h3>Secondary Education Children</h3>
+        <button type="button" class="btn btn-add" (click)="addSecondaryChild()">Add Secondary Education Child</button>
+
+        <div *ngFor="let child of secondaryChildren; let i = index" class="child-form">
+          <div class="child-header">
+            <h4>Secondary Child {{i + 1}}</h4>
+            <button type="button" class="btn btn-remove" (click)="removeSecondaryChild(i)">Remove</button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Child Full Name</label>
+              <input type="text" [(ngModel)]="child.childFullName" name="secondaryChildName{{i}}" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Child Birth Date</label>
+              <input type="date" [(ngModel)]="child.childBirthDate" name="secondaryChildBirth{{i}}" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Year</label>
+              <input type="text" [(ngModel)]="child.academicYear" name="secondaryChildYear{{i}}" placeholder="e.g., 2023-2024" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>PDF File</label>
+              <input type="file" (change)="onSecondaryFileSelected($event, i)" accept=".pdf" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Higher Education Children -->
+      <div class="children-section">
+        <h3>Higher Education Children</h3>
+        <button type="button" class="btn btn-add" (click)="addHigherChild()">Add Higher Education Child</button>
+
+        <div *ngFor="let child of higherChildren; let i = index" class="child-form">
+          <div class="child-header">
+            <h4>Higher Education Child {{i + 1}}</h4>
+            <button type="button" class="btn btn-remove" (click)="removeHigherChild(i)">Remove</button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Child Full Name</label>
+              <input type="text" [(ngModel)]="child.childFullName" name="higherChildName{{i}}" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Child Birth Date</label>
+              <input type="date" [(ngModel)]="child.childBirthDate" name="higherChildBirth{{i}}" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Year</label>
+              <input type="text" [(ngModel)]="child.academicYear" name="higherChildYear{{i}}" placeholder="e.g., 2023-2024" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>PDF File</label>
+              <input type="file" (change)="onHigherFileSelected($event, i)" accept=".pdf" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="submit-section">
+      <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || !employeeForm.form.valid">
+        {{isSubmitting ? 'Submitting...' : 'Submit Application'}}
+      </button>
+    </div>
+
+    <!-- Message Display -->
+    <div *ngIf="message" class="message" [ngClass]="{'success': messageType === 'success', 'error': messageType === 'error'}">
+      {{message}}
+    </div>
+  </form>
+</div>
+

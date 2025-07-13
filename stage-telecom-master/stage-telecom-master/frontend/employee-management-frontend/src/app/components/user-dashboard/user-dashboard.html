@@ -1,0 +1,259 @@
+<div class="container">
+  <div class="header">
+    <h1>User Dashboard</h1>
+    <div class="nav-buttons">
+      <button type="button" class="btn btn-secondary" (click)="goToEmployeeForm()">Employee Form</button>
+      <button type="button" class="btn btn-secondary" (click)="goToAdminDashboard()">Admin Dashboard</button>
+      <button type="button" class="btn btn-primary" (click)="refresh()">Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading your information...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <div class="error-icon">⚠️</div>
+    <p>{{error}}</p>
+  </div>
+
+  <div *ngIf="!loading && !error && employee">
+    <!-- Employee Information Card -->
+    <div class="section employee-section">
+      <h2>👤 Employee Information</h2>
+      <div class="employee-card">
+        <div class="employee-info">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Full Name:</label>
+              <span class="value">{{employee.firstName}} {{employee.lastName}}</span>
+            </div>
+            <div class="info-item">
+              <label>Matricule:</label>
+              <span class="value matricule">{{employee.matricule}}</span>
+            </div>
+            <div class="info-item">
+              <label>Date of Birth:</label>
+              <span class="value">{{formatDate(employee.dateBirth)}}</span>
+            </div>
+            <div class="info-item">
+              <label>Workplace:</label>
+              <span class="value">{{employee.workplace}}</span>
+            </div>
+            <div class="info-item" *ngIf="employee.wifeFirstName">
+              <label>Spouse Name:</label>
+              <span class="value">{{employee.wifeFirstName}} {{employee.wifeLastName}}</span>
+            </div>
+            <div class="info-item" *ngIf="employee.wifeWorkplace">
+              <label>Spouse Workplace:</label>
+              <span class="value">{{employee.wifeWorkplace}}</span>
+            </div>
+            <div class="info-item" *ngIf="employee.wifeMatricule">
+              <label>Spouse Matricule:</label>
+              <span class="value">{{employee.wifeMatricule}}</span>
+            </div>
+            <div class="info-item">
+              <label>Number of Children:</label>
+              <span class="value children-count">{{employee.numChildren}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Children Information -->
+    <div class="section children-section" *ngIf="employee.primaryEducationChildren?.length || employee.secondaryEducationChildren?.length || employee.higherEducationChildren?.length">
+      <h2>👶 Children Information</h2>
+      
+      <div *ngIf="employee.primaryEducationChildren?.length" class="education-group">
+        <h3 class="education-title">🎒 Primary Education Children</h3>
+        <div class="children-grid">
+          <div *ngFor="let child of employee.primaryEducationChildren; let i = index" class="child-card primary">
+            <div class="child-header">
+              <div class="child-number">{{i + 1}}</div>
+              <div class="child-name">{{child.childFullName}}</div>
+            </div>
+            <div class="child-details">
+              <div class="detail-row">
+                <span class="detail-label">📅 Birth Date:</span>
+                <span class="detail-value">{{formatDate(child.childBirthDate)}}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📚 Academic Year:</span>
+                <span class="detail-value">{{child.academicYear}}</span>
+              </div>
+              <div class="detail-row" *ngIf="child.pdfFileName">
+                <span class="detail-label">📄 Document:</span>
+                <span class="detail-value file-name">
+                  <button type="button" class="btn-link pdf-link" (click)="viewPDF(child.pdfFilePath!, child.pdfFileName!)">
+                    {{child.pdfFileName}}
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="employee.secondaryEducationChildren?.length" class="education-group">
+        <h3 class="education-title">🏫 Secondary Education Children</h3>
+        <div class="children-grid">
+          <div *ngFor="let child of employee.secondaryEducationChildren; let i = index" class="child-card secondary">
+            <div class="child-header">
+              <div class="child-number">{{i + 1}}</div>
+              <div class="child-name">{{child.childFullName}}</div>
+            </div>
+            <div class="child-details">
+              <div class="detail-row">
+                <span class="detail-label">📅 Birth Date:</span>
+                <span class="detail-value">{{formatDate(child.childBirthDate)}}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📚 Academic Year:</span>
+                <span class="detail-value">{{child.academicYear}}</span>
+              </div>
+              <div class="detail-row" *ngIf="child.pdfFileName">
+                <span class="detail-label">📄 Document:</span>
+                <span class="detail-value file-name">
+                  <button type="button" class="btn-link pdf-link" (click)="viewPDF(child.pdfFilePath!, child.pdfFileName!)">
+                    {{child.pdfFileName}}
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="employee.higherEducationChildren?.length" class="education-group">
+        <h3 class="education-title">🎓 Higher Education Children</h3>
+        <div class="children-grid">
+          <div *ngFor="let child of employee.higherEducationChildren; let i = index" class="child-card higher">
+            <div class="child-header">
+              <div class="child-number">{{i + 1}}</div>
+              <div class="child-name">{{child.childFullName}}</div>
+            </div>
+            <div class="child-details">
+              <div class="detail-row">
+                <span class="detail-label">📅 Birth Date:</span>
+                <span class="detail-value">{{formatDate(child.childBirthDate)}}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📚 Academic Year:</span>
+                <span class="detail-value">{{child.academicYear}}</span>
+              </div>
+              <div class="detail-row" *ngIf="child.pdfFileName">
+                <span class="detail-label">📄 Document:</span>
+                <span class="detail-value file-name">
+                  <button type="button" class="btn-link pdf-link" (click)="viewPDF(child.pdfFilePath!, child.pdfFileName!)">
+                    {{child.pdfFileName}}
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applications Status -->
+    <div class="section applications-section">
+      <h2>📋 My Applications</h2>
+      <div *ngIf="applications.length === 0" class="no-applications">
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h3>No Applications Found</h3>
+          <p>You haven't submitted any applications yet.</p>
+          <button type="button" class="btn btn-primary" (click)="goToEmployeeForm()">
+            Submit New Application
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="applications.length > 0" class="applications-grid">
+        <div *ngFor="let application of applications; let i = index" class="application-card" [ngClass]="getStatusClass(application.status)">
+          <div class="application-header">
+            <div class="application-info">
+              <div class="application-id">Application #{{application.id}}</div>
+              <div class="application-date">
+                Submitted: {{formatDate(application.submissionDate || '')}}
+              </div>
+            </div>
+            <div class="application-status-badge" [ngClass]="getStatusClass(application.status)">
+              <span class="status-icon">{{getStatusIcon(application.status)}}</span>
+              <span class="status-text">{{getStatusText(application.status)}}</span>
+            </div>
+          </div>
+          
+          <div class="application-body">
+            <div class="timeline">
+              <div class="timeline-item completed">
+                <div class="timeline-icon">✓</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Application Submitted</div>
+                  <div class="timeline-date">{{formatDate(application.submissionDate || '')}}</div>
+                </div>
+              </div>
+              
+              <div class="timeline-item" [ngClass]="{'completed': application.reviewDate, 'current': !application.reviewDate && application.status === 'EN_ATTENTE'}">
+                <div class="timeline-icon">
+                  <span *ngIf="application.reviewDate">{{getStatusIcon(application.status)}}</span>
+                  <span *ngIf="!application.reviewDate && application.status === 'EN_ATTENTE'">⏳</span>
+                  <span *ngIf="!application.reviewDate && application.status !== 'EN_ATTENTE'">○</span>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-title">
+                    <span *ngIf="application.status === 'EN_ATTENTE'">Under Review</span>
+                    <span *ngIf="application.status === 'ACCEPTED'">Application Approved</span>
+                    <span *ngIf="application.status === 'REJECTED'">Application Rejected</span>
+                  </div>
+                  <div class="timeline-date" *ngIf="application.reviewDate">
+                    {{formatDate(application.reviewDate)}}
+                  </div>
+                  <div class="timeline-date" *ngIf="!application.reviewDate && application.status === 'EN_ATTENTE'">
+                    Waiting for admin review...
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="application-details" *ngIf="application.reviewedBy || application.rejectionReason">
+              <div class="detail-item" *ngIf="application.reviewedBy">
+                <label>👤 Reviewed By:</label>
+                <span class="value">{{application.reviewedBy}}</span>
+              </div>
+              
+              <div class="detail-item rejection-detail" *ngIf="application.rejectionReason">
+                <label>❌ Rejection Reason:</label>
+                <div class="rejection-reason">{{application.rejectionReason}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Viewer Modal -->
+  <div *ngIf="showPDFModal" class="modal-overlay pdf-modal" (click)="closePDFModal()">
+    <div class="modal-content pdf-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📄 {{currentPDFName}}</h3>
+        <button type="button" class="close-btn" (click)="closePDFModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body pdf-body">
+        <iframe [src]="currentPDFUrl" class="pdf-viewer" frameborder="0"></iframe>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closePDFModal()">Close</button>
+        <a [href]="currentPDFUrl" target="_blank" class="btn btn-primary">
+          📥 Download PDF
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
